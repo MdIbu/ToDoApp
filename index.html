@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Todo Ibu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" /> 
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+<link href='https://fonts.googleapis.com/css?family=Roboto:400,700,900' rel='stylesheet' type='text/css'><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+<link href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="./style.css">
+<script type="text/javascript" src="brython.js"></script>
+ <script type="text/javascript" src="brython_stdlib.js"></script>
+ <script type="text/python">
+from browser.local_storage import storage
+from browser import document as doc
+from browser import window as win
+from browser import html
+from browser import html
+import datetime
+import json
+try:
+    storage['tasklist']
+except:
+    storage['tasklist'] = json.dumps({})
+
+def get_date():
+    date = datetime.datetime.now()
+    return date.strftime('%b-%H:%M')
+
+def get_form_data():
+    task = doc["taskform"].value
+    relevance = doc["relevanceform"].value
+    details = doc["detailsform"].value
+    return task, relevance, details
+                                         
+class ToDo:
+    def __init__(self):
+        self.tasks = json.loads(storage['tasklist'])
+        for key in self.tasks:
+            self.add_task_row(key)
+    
+    def add_task(self, ev):
+        key = get_date()
+        task, relevance, details= get_form_data()
+        self.tasks[key] = [task, relevance, details]
+        self._save()
+        self.add_task_row(key)
+
+    def _del_task(self,event):
+        # get row
+        elt = event.target
+        while elt.parent and elt.tagName != 'DIV':
+            elt = elt.parent
+        key = elt.id
+        del self.tasks[key]
+        del doc[key]
+        self._save()
+        
+    def add_task_row(self, key):
+        if self.tasks[key][1] == "High":
+            color = "danger"
+        elif self.tasks[key][1] == "Medium":
+            hcolor = "warning"
+        else:
+            color = "success"
+        #row = html.TR(Class = color)
+        #row.id = key
+        self._temp_key = key
+        link = html.A(Class="fa fa-times-circle")
+        link.href = "#"
+        link.bind('click', self._del_task)
+        box = html.DIV(html.H2(self.tasks[key][0])+html.H4(key)+html.P(self.tasks[key][2])+html.I(link),id=key,Class="box")
+        #box.id = key
+            
+    def clear(self, ev):
+        for key in self.tasks:
+            del doc[key]
+        self.tasks = {}
+        self._save()
+
+    def _save(self):
+        storage['tasklist'] = json.dumps(self.tasks)
+
+todo = ToDo()
+add_task = getattr(todo,'add_task')
+clear_all = getattr(todo,'clear')
+print("hello")
+doc["submitclick"].bind("click", add_task)
+ </script>
+<style type="text/css">
+  textarea[type='text']::placeholder
+    {   line-height:170px;
+        text-align: center;
+        font-weight: normal;
+        font-family:monotype corsiva;
+        font-size: 15px;
+    }
+    textarea{
+    resize: none;
+    font-size: 25px;
+    color: black;
+    }
+    
+    .registration-form{
+        top: 150px;
+    }
+    body{
+    background: black;}
+    #menuhead{
+    font-family: monotype corsiva;
+    text-decoration: none;
+    font-size: 50px;
+    color: white;}
+</style>
+</head>
+<body onload="brython()">
+          <center><a href="#" id="menuhead">Todo Ibu</a>
+        </center>
+<div class="registration-form">
+  <header>
+    <h1>ToDo List</h1>
+    <b>:::::::::::::::::::::::::::::::::::::::::::::::</b>
+  </header>
+  <form>
+    <div class="input-section email-section">
+      <textarea id="taskform" style="border:none; outline:none; font-weight:bold; color:black;" rows="5" cols="40"class="email" type="text" autocomplete="off" placeholder="What is this task about?" required=""></textarea>
+      <div class="animated-button"><span class="icon-paper-plane"></span><span class="next-button email"><i class="fa fa-arrow-right"></i></span></div>
+    </div>
+     <div class="input-section password-section folded">
+      <textarea id="relevanceform" style="border:none; outline:none;font-weight:bold; color:black" rows="5" cols="40"class="password" type="text" autocomplete="off" placeholder="Priority of the task(High,Medium,Low)" required></textarea>
+     <!--<input class="password" type="text" placeholder="" size="50" />-->
+      <div class="animated-button"><span class="icon-lock"></span><span class="next-button password"><i class="fa fa-arrow-right"></i></span></div>
+    </div>
+  
+    <div class="input-section repeat-password-section folded">
+      <textarea id="detailsform" style="border:none; outline:none;font-weight:bold; color:black" rows="5" cols="40"class="password" type="text" autocomplete="off" placeholder="Task Details" required></textarea>
+      <!--<input class="repeat-password" type="text" placeholder="Task Details"/>-->
+      <div class="animated-button"><span class="icon-repeat-lock"></span><span id="submitclick" class="next-button repeat-password"><i class="fa fa-arrow-right"></i></span></div>
+    </div>
+    <div class="success"> 
+      <p>Task Added</p>
+    </div>
+  </form>
+
+</div>
+
+<script type="text/javascript">
+function refreshPage(){
+    window.location.reload();
+} 
+</script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script><script  src="./script.js"></script>
+<h6 style="bottom:8px;left: 18px;color: white;position: absolute;">Tasks</h6>
+<a style="bottom:32px;left: 20px;color: white;position: absolute;text-decoration: none;" href="./content_insertion.html"<i class="fa fa-list-ul fa-2x" aria-hidden="true"></i></a>
+
+<h6 style="bottom:8px;right: 20px;color: white;position: absolute;">Add</h6>
+<a id="addtaskbutton"style="bottom:30px;right: 20px;color: white;position: absolute;text-decoration: none;" href="./index.html" onClick="refreshPage()"<i class="fa fa-plus fa-2x" aria-hidden="true"></i></a>
+</body>
+</html>
